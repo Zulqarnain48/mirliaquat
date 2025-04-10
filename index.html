@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LearnHub - Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5e35b1;
+            --secondary: #3949ab;
+            --accent: #7c4dff;
+            --text: #263238;
+            --light-text: #546e7a;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --border: #e0e0e0;
+            --urgent: #ff5252;
+            --warning: #ffab00;
+            --success: #4caf50;
+            --sidebar-width: 380px;
+            --base-font-size: clamp(14px, 2vw, 16px);
+        }
+
+        .dark-mode {
+            --primary: #7c4dff;
+            --secondary: #5e35b1;
+            --accent: #9575cd;
+            --text: #eceff1;
+            --light-text: #b0bec5;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --border: #333;
+            --urgent: #ff6e6e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            font-size: var(--base-font-size);
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: 100vh;
+            gap: 25px;
+            padding: 25px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr var(--sidebar-width);
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .user-header {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .profile-pic-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            cursor: pointer;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-upload {
+            display: none;
+        }
+
+        .profile-pic-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 0.8rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+
+        .profile-pic-container:hover .profile-pic-overlay {
+            transform: translateY(0);
+        }
+
+        .user-header h1 {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            margin-bottom: 8px;
+            max-width: calc(100% - 100px);
+        }
+
+        .user-email {
+            color: var(--light-text);
+            font-size: 1rem;
+            max-width: calc(100% - 100px);
+        }
+
+        .welcome-banner {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px;
+        }
+
+        .welcome-banner h2 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 8px;
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 75%, var(--bg) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .progress-circle::after {
+            content: '';
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background-color: var(--card);
+            border-radius: 50%;
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+
+        /* Quick Navigation */
+        .quick-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .nav-card {
+            background-color: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .nav-card i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .nav-card p {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Courses Section */
+        .courses-section {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .courses-section h2 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 20px;
+        }
+
+        .course-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .course-item:last-child {
+            border-bottom: none;
+        }
+
+        .course-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .course-info h3 {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 8px;
+        }
+
+        .course-info p {
+            color: var(--light-text);
+            font-size: 0.95rem;
+        }
+
+        .course-progress {
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background-color: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 65%;
+        }
+
+        .progress-text-small {
+            font-size: 0.85rem;
+            color: var(--light-text);
+        }
+
+        /* Tasks Sidebar */
+        .tasks-sidebar {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 25px;
+        }
+
+        @media (max-width: 767px) {
+            .tasks-sidebar {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                z-index: 1000;
+                transition: right 0.3s ease;
+                padding-top: 4rem;
+            }
+            
+            .tasks-sidebar.active {
+                right: 0;
+            }
+        }
+
+        .tasks-sidebar h2 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 10px;
+        }
+
+        .task-item {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background-color: rgba(255,255,255,0.05);
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+        }
+
+        .task-item.urgent {
+            border-left-color: var(--urgent);
+        }
+
+        .task-item.warning {
+            border-left-color: var(--warning);
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .task-due {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .task-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .task-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .urgent-btn {
+            background-color: var(--urgent);
+            color: white;
+        }
+
+        .warning-btn {
+            background-color: var(--warning);
+            color: var(--text);
+        }
+
+        .primary-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .reminder-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: rgba(255,255,255,0.03);
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .reminder-item:hover {
+            background-color: rgba(255,255,255,0.08);
+        }
+
+        .reminder-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .reminder-text {
+            flex-grow: 1;
+        }
+
+        .reminder-text div:first-child {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .reminder-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .reminder-action-btn {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .reminder-action-btn:hover {
+            color: var(--primary);
+        }
+
+        .add-reminder {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--primary);
+            margin-top: 10px;
+            cursor: pointer;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .add-reminder:hover {
+            background-color: rgba(124, 77, 255, 0.1);
+        }
+
+        .add-reminder i {
+            font-size: 1.1rem;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 600px) {
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: var(--card);
+            color: var(--text);
+            font-size: 1rem;
+            min-height: 44px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 {
+            font-size: 1.8rem;
+        }
+
+        /* Progress Page Styles */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .progress-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background-color: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        /* Schedule Page Styles */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .calendar-nav-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--primary);
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .calendar-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-day {
+                min-height: auto;
+                padding: 0.5rem;
+            }
+            
+            .calendar-event {
+                font-size: 0.7rem;
+                padding: 0.25rem;
+                margin-bottom: 0.25rem;
+            }
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            color: var(--primary);
+        }
+
+        .calendar-day {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 100px;
+            border: 1px solid var(--border);
+        }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .calendar-event {
+            background-color: var(--primary);
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .calendar-event.lecture {
+            background-color: #4caf50;
+        }
+
+        .calendar-event.assignment {
+            background-color: #ff9800;
+        }
+
+        .calendar-event.exam {
+            background-color: #f44336;
+        }
+
+        /* Profile Page Styles */
+        .profile-section {
+            margin-bottom: 30px;
+        }
+
+        .profile-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .profile-pic-large {
+                margin: 0 auto 1rem;
+            }
+            
+            .skills-container, .hobbies-list {
+                justify-content: center;
+            }
+        }
+
+        .profile-pic-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+        }
+
+        .profile-details h4 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .profile-details p {
+            color: var(--light-text);
+            margin-bottom: 8px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            background-color: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .education-item, .experience-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .education-item:last-child, .experience-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .item-date {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        .item-subtitle {
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .hobbies-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .hobby-item {
+            background-color: rgba(124, 77, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        /* Edit Profile Button */
+        .edit-profile-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: all 0.2s;
+            min-height: 44px;
+        }
+
+        .edit-profile-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        /* Profile Upload Modal */
+        .profile-upload-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-upload-content {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .profile-upload-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 3px solid var(--primary);
+            display: block;
+        }
+
+        .profile-upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            min-height: 44px;
+        }
+
+        #profile-upload-input {
+            display: none;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text);
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        .toast {
+            background-color: var(--card);
+            color: var(--text);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease, fadeOut 0.5s ease 4.5s forwards;
+            max-width: 350px;
+        }
+
+        .toast-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                display: none;
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .tasks-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .progress-tracker {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .progress-circle {
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .user-header, .progress-tracker, .courses-section, .tasks-sidebar, .page {
+                padding: 15px;
+            }
+
+            .task-actions {
+                flex-direction: column;
+            }
+
+            .profile-pic-container {
+                width: 60px;
+                height: 60px;
+                top: 15px;
+                right: 15px;
+            }
+
+            .user-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="toast-container" id="toast-container">
+        <!-- Toast notifications will be added here dynamically -->
+    </div>
+
+    <div class="app-container">
+        <main class="main-content">
+            <!-- Dashboard Page (Default) -->
+            <div class="page active" id="dashboard-page">
+                <div class="user-header">
+                    <h1>Mir Liaqat</h1>
+                    <p class="user-email">mirliaqat95@example.com</p>
+                    
+                    <div class="profile-pic-container" onclick="showProfileUploadModal()">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="profile-pic" id="profile-pic">
+                        <div class="profile-pic-overlay">Change Photo</div>
+                        <input type="file" id="profile-upload" class="profile-upload" accept="image/*">
+                    </div>
+                    
+                    <div class="welcome-banner">
+                        <h2>Welcome back, liaqat!</h2>
+                        <p>You have 3 active courses. Keep learning!</p>
+                    </div>
+                </div>
+
+                <div class="progress-tracker">
+                    <div class="progress-circle">
+                        <span class="progress-text">75%</span>
+                    </div>
+                    <div>
+                        <h3>Overall Progress</h3>
+                        <p>Great job! You're on track.</p>
+                    </div>
+                </div>
+
+                <div class="quick-nav">
+                    <div class="nav-card" onclick="showPage('schedule')">
+                        <i class="fas fa-calendar"></i>
+                        <p>Schedule</p>
+                    </div>
+                    <div class="nav-card" onclick="showPage('progress')">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Progress</p>
+                    </div>
+                    <div class="nav-card" onclick="showPage('profile')">
+                        <i class="fas fa-user"></i>
+                        <p>Profile</p>
+                    </div>
+                </div>
+
+                <div class="courses-section">
+                    <h2>My Courses</h2>
+                    <div class="course-item">
+                        <div class="course-icon">
+                            <i class="fas fa-mobile"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>web development Development</h3>
+                            <p>By ma'am zaib-ul-nissa </p>
+                            <div class="course-progress">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 65%"></div>
+                                </div>
+                                <span class="progress-text-small">65% complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="course-item">
+                        <div class="course-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>Database Systems</h3>
+                            <p>By ma'am zartasha baloch</p>
+                            <div class="course-progress">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 40%"></div>
+                                </div>
+                                <span class="progress-text-small">40% complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="course-item">
+                        <div class="course-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <div class="course-info">
+                            <h3>UI/UX Design</h3>
+                            <p>By sir irfan</p>
+                            <div class="course-progress">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 25%"></div>
+                                </div>
+                                <span class="progress-text-small">25% complete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Page -->
+            <div class="page" id="schedule-page">
+                <div class="page-header">
+                    <h2>My Schedule</h2>
+                </div>
+                
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                        <span class="calendar-title">June 2023</span>
+                        <button class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <button class="task-btn primary-btn">Add Event</button>
+                </div>
+                
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                    
+                    <!-- Week 1 -->
+                    <div class="calendar-day">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">29</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">30</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">31</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">1</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">2</div>
+                        <div class="calendar-event lecture">web Development Lecture 10:00 AM</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">3</div>
+                    </div>
+                    
+                    <!-- Week 2 -->
+                    <div class="calendar-day">
+                        <div class="day-number">4</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">5</div>
+                        <div class="calendar-event assignment">DB Assignment Due</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">6</div>
+                        <div class="calendar-event lecture">UI/UX Workshop 2:00 PM</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">7</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">8</div>
+                        <div class="calendar-event exam">Midterm Exam</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">9</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">10</div>
+                    </div>
+                    
+                    <!-- Week 3 -->
+                    <div class="calendar-day">
+                        <div class="day-number">11</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">12</div>
+                        <div class="calendar-event lecture"> DB Lab</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">13</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">14</div>
+                        <div class="calendar-event assignment">UI Project Draft</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">15</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">16</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">17</div>
+                    </div>
+                    
+                    <!-- Week 4 -->
+                    <div class="calendar-day">
+                        <div class="day-number">18</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">19</div>
+                        <div class="calendar-event exam">Final Exam</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">20</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">21</div>
+                        <div class="calendar-event assignment">Final Project Due</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">22</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">23</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">24</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Page -->
+            <div class="page" id="progress-page">
+                <div class="page-header">
+                    <h2>My Progress</h2>
+                </div>
+                
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Course Completion</h3>
+                        <div class="chart-container">
+                            <canvas id="completionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Weekly Activity</h3>
+                        <div class="chart-container">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">75%</div>
+                        <div class="stat-label">Overall Completion</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Lessons Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Active Courses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">24h</div>
+                        <div class="stat-label">Study Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Assignments Done</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">92%</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card" style="margin-top: 20px;">
+                    <h3>Performance Trend</h3>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="page" id="profile-page">
+                <div class="page-header">
+                    <h2>My Profile</h2>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-info">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile Picture" class="profile-pic-large" id="profile-pic-large">
+                        <div class="profile-details">
+                            <h4>Mir Liaqat</h4>
+                            <p><i class="fas fa-envelope"></i> mirliaqat@example.com</p>
+                            <p><i class="fas fa-phone"></i> (031) 456-7890</p>
+                            <p><i class="fas fa-map-marker-alt"></i> jamshoro, sindh</p>
+                            <p><i class="fas fa-graduation-cap"></i> Computer Systems Major</p>
+                            <a href="#" class="edit-profile-btn" onclick="showProfileUploadModal()">Edit Profile</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>About Me</h3>
+                    <p>I'm a passionate computer science student with a focus on web  application development and user experience design. I enjoy solving complex problems and creating intuitive interfaces that make technology accessible to everyone. When I'm not coding, you can find me hiking, playing chess, or experimenting with photography.</p>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>Education</h3>
+                    <div class="education-item">
+                        <div class="item-header">
+                            <div class="item-title">Bachelor of engineering in Computer Systems</div>
+                            <div class="item-date">2020 - 2024</div>
+                        </div>
+                        <div class="item-subtitle"> Mehran University of Technology</div>
+                        <p>GPA: 3.5/4.0</p>
+                        <p>Specialization: Human-Computer Interaction</p>
+                    </div>
+                    <div class="education-item">
+                        <div class="item-header">
+                            <div class="item-title">High School journey</div>
+                            <div class="item-date">2016 - 2020</div>
+                        </div>
+                        <div class="item-subtitle">Tech Valley High School</div>
+                        <p>Graduated with Honors</p>
+                        <p>Focus: Advanced Mathematics and Computer Systems</p>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>Skills</h3>
+                    <div class="skills-container">
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">React Native</span>
+                        <span class="skill-tag">UI/UX Design</span>
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Database Design</span>
+                        <span class="skill-tag">Flutter</span>
+                        <span class="skill-tag">Figma</span>
+                        <span class="skill-tag">Project Management</span>
+                        <span class="skill-tag">Agile Methodologies</span>
+                        <span class="skill-tag">Git</span>
+                        <span class="skill-tag">REST APIs</span>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>Experience</h3>
+                    <div class="experience-item">
+                        <div class="item-header">
+                            <div class="item-title">UI/UX Intern</div>
+                            <div class="item-date">Summer 2022</div>
+                        </div>
+                        <div class="item-subtitle">TechSolutions Inc.</div>
+                        <p>Assisted in redesigning the company's web app interface, conducted user research, and created wireframes and prototypes. Collaborated with developers to implement design changes and improve user experience metrics by 30%.</p>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-header">
+                            <div class="item-title">Freelance Developer</div>
+                            <div class="item-date">2021 - Present</div>
+                        </div>
+                        <div class="item-subtitle">Self-Employed</div>
+                        <p>Developed web applications for small businesses, focusing on e-commerce and service booking platforms. Delivered 5 successful projects with an average client satisfaction rating of 4.9/5.</p>
+                    </div>
+                    <div class="experience-item">
+                        <div class="item-header">
+                            <div class="item-title">Teaching Assistant</div>
+                            <div class="item-date">2021 - 2022</div>
+                        </div>
+                        <div class="item-subtitle">  Mehran University of Technology</div>
+                        <p>Assisted professors in introductory programming courses, held office hours, and helped students with debugging and understanding core concepts. Received outstanding TA award for exceptional student support.</p>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h3>Hobbies & Interests</h3>
+                    <div class="hobbies-list">
+                        <span class="hobby-item">Photography</span>
+                        <span class="hobby-item">Hiking</span>
+                        <span class="hobby-item">Open Source</span>
+                        <span class="hobby-item">Chess</span>
+                        <span class="hobby-item">Music Production</span>
+                        <span class="hobby-item">Reading</span>
+                        <span class="hobby-item">Travel</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="tasks-sidebar">
+            <h2>Upcoming Tasks</h2>
+            <div class="task-item urgent">
+                <div class="task-title">Web Dev - Assignment 3</div>
+                <div class="task-due">Due tomorrow at 11:59 PM</div>
+                <div class="task-actions">
+                    <button class="task-btn urgent-btn">Start Now</button>
+                </div>
+            </div>
+            <div class="task-item warning">
+                <div class="task-title">Data Science - Quiz 2</div>
+                <div class="task-due">Due in 3 days</div>
+                <div class="task-actions">
+                    <button class="task-btn warning-btn">Prepare</button>
+                </div>
+            </div>
+            <div class="task-item">
+                <div class="task-title">Mobile Design - Final Project</div>
+                <div class="task-due">Due in 2 weeks</div>
+                <div class="task-actions">
+                    <button class="task-btn primary-btn">Plan</button>
+                </div>
+            </div>
+
+            <h3>Study Reminders</h3>
+            <div class="reminders-list">
+                <div class="reminder-item" id="reminder-1">
+                    <i class="fas fa-laptop reminder-icon"></i>
+                    <div class="reminder-text">
+                        <div>Web Dev Practice</div>
+                        <div class="task-due">Daily at 7:00 PM</div>
+                    </div>
+                    <div class="reminder-actions">
+                        <button class="reminder-action-btn" onclick="deleteReminder('reminder-1')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="reminder-item" id="reminder-2">
+                    <i class="fas fa-book reminder-icon"></i>
+                    <div class="reminder-text">
+                        <div>Data Science Reading</div>
+                        <div class="task-due">Weekdays at 8:00 AM</div>
+                    </div>
+                    <div class="reminder-actions">
+                        <button class="reminder-action-btn" onclick="deleteReminder('reminder-2')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-reminder" onclick="showReminderModal()">
+                <i class="fas fa-plus"></i>
+                <span>Add New Reminder</span>
+            </div>
+
+            <div class="theme-toggle">
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="theme-label">Dark Mode</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div class="modal" id="reminder-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Reminder</h3>
+                <button class="close-modal" onclick="hideReminderModal()">&times;</button>
+            </div>
+            <form id="reminder-form" onsubmit="addReminder(event)">
+                <div class="form-group">
+                    <label for="reminder-title">Reminder Title</label>
+                    <input type="text" id="reminder-title" required placeholder="What to study?">
+                </div>
+                <div class="form-group">
+                    <label for="reminder-time">Time</label>
+                    <input type="time" id="reminder-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="reminder-days">Repeat</label>
+                    <select id="reminder-days">
+                        <option value="daily">Daily</option>
+                        <option value="weekdays">Weekdays</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="none">No repeat</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="task-btn" onclick="hideReminderModal()">Cancel</button>
+                    <button type="submit" class="task-btn primary-btn">Save Reminder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Upload Modal -->
+    <div class="profile-upload-modal" id="profile-upload-modal">
+        <div class="profile-upload-content">
+            <h3>Update Profile Picture</h3>
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Preview" class="profile-upload-preview" id="profile-upload-preview">
+            
+            <label for="profile-upload-input" class="profile-upload-btn">
+                Choose Photo
+            </label>
+            <input type="file" id="profile-upload-input" accept="image/*">
+            
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" class="task-btn" onclick="hideProfileUploadModal()">Cancel</button>
+                <button type="button" class="task-btn primary-btn" onclick="updateProfilePicture()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store reminders in localStorage
+        let reminders = [];
+        
+        // Load saved reminders on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved theme preference
+            if (localStorage.getItem('theme') === 'dark' || 
+                (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme'))) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-toggle').checked = true;
+            }
+            updateThemeLabel();
+            
+            // Load saved profile picture
+            const savedProfilePic = localStorage.getItem('profilePic');
+            if (savedProfilePic) {
+                document.getElementById('profile-pic').src = savedProfilePic;
+                document.getElementById('profile-pic-large').src = savedProfilePic;
+                document.getElementById('profile-upload-preview').src = savedProfilePic;
+            }
+            
+            // Load saved reminders
+            const savedReminders = localStorage.getItem('reminders');
+            if (savedReminders) {
+                reminders = JSON.parse(savedReminders);
+                renderReminders();
+            } else {
+                // Initialize with default reminders if none exist
+                reminders = [
+                    {
+                        id: 'reminder-1',
+                        title: 'Web Dev Practice',
+                        time: '19:00',
+                        days: 'daily',
+                        formattedTime: '7:00 PM',
+                        daysText: 'Daily'
+                    },
+                    {
+                        id: 'reminder-2',
+                        title: 'Data Science Reading',
+                        time: '08:00',
+                        days: 'weekdays',
+                        formattedTime: '8:00 AM',
+                        daysText: 'Weekdays'
+                    }
+                ];
+                localStorage.setItem('reminders', JSON.stringify(reminders));
+            }
+            
+            // Start reminder checker
+            setInterval(checkReminders, 30000); // Check every 30 seconds
+            
+            // Initialize charts when progress page is shown
+            if (document.getElementById('progress-page').classList.contains('active')) {
+                initCharts();
+            }
+        });
+        
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeLabel = document.getElementById('theme-label');
+        
+        themeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+            updateThemeLabel();
+        });
+        
+        function updateThemeLabel() {
+            themeLabel.textContent = document.body.classList.contains('dark-mode') ? 'Light Mode' : 'Dark Mode';
+        }
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const tasksSidebar = document.querySelector('.tasks-sidebar');
+
+        mobileMenuToggle.addEventListener('click', function() {
+            tasksSidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!tasksSidebar.contains(event.target) && event.target !== mobileMenuToggle) {
+                tasksSidebar.classList.remove('active');
+            }
+        });
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(`${pageId}-page`).classList.add('active');
+            
+            // Initialize charts when progress page is shown
+            if (pageId === 'progress') {
+                initCharts();
+            }
+        }
+
+        // Profile picture upload functionality
+        function showProfileUploadModal() {
+            document.getElementById('profile-upload-modal').style.display = 'flex';
+        }
+
+        function hideProfileUploadModal() {
+            document.getElementById('profile-upload-modal').style.display = 'none';
+        }
+
+        function updateProfilePicture() {
+            const fileInput = document.getElementById('profile-upload-input');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Update preview in modal
+                    document.getElementById('profile-upload-preview').src = e.target.result;
+                    
+                    // Update profile pictures in dashboard and profile page
+                    document.getElementById('profile-pic').src = e.target.result;
+                    document.getElementById('profile-pic-large').src = e.target.result;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('profilePic', e.target.result);
+                    
+                    // Close modal
+                    hideProfileUploadModal();
+                };
+                
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // Setup file input change handler
+        document.getElementById('profile-upload-input').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-upload-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // Reminder functionality
+        function showReminderModal() {
+            document.getElementById('reminder-modal').style.display = 'flex';
+        }
+
+        function hideReminderModal() {
+            document.getElementById('reminder-modal').style.display = 'none';
+            document.getElementById('reminder-form').reset();
+        }
+
+        function addReminder(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('reminder-title').value;
+            const time = document.getElementById('reminder-time').value;
+            const days = document.getElementById('reminder-days').value;
+            
+            // Format time (e.g., 19:00 -> 7:00 PM)
+            const timeParts = time.split(':');
+            let hours = parseInt(timeParts[0]);
+            const minutes = timeParts[1];
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // Convert 0 to 12
+            const formattedTime = `${hours}:${minutes} ${ampm}`;
+            
+            // Format days text
+            let daysText = '';
+            switch(days) {
+                case 'daily': daysText = 'Daily'; break;
+                case 'weekdays': daysText = 'Weekdays'; break;
+                case 'weekly': daysText = 'Weekly'; break;
+                default: daysText = ''; break;
+            }
+            
+            // Create new reminder object
+            const reminderId = 'reminder-' + Date.now();
+            const reminder = {
+                id: reminderId,
+                title: title,
+                time: time,
+                days: days,
+                formattedTime: formattedTime,
+                daysText: daysText
+            };
+            
+            // Add to reminders array
+            reminders.push(reminder);
+            
+            // Save to localStorage
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+            
+            // Render reminders
+            renderReminders();
+            
+            // Show toast notification
+            showToast('Reminder Added', `${title} - ${daysText ? daysText + ' at ' : ''}${formattedTime}`);
+            
+            // Close modal and reset form
+            hideReminderModal();
+        }
+
+        function renderReminders() {
+            const remindersList = document.querySelector('.reminders-list');
+            remindersList.innerHTML = '';
+            
+            reminders.forEach(reminder => {
+                const reminderItem = document.createElement('div');
+                reminderItem.className = 'reminder-item';
+                reminderItem.id = reminder.id;
+                reminderItem.innerHTML = `
+                    <i class="fas fa-bell reminder-icon"></i>
+                    <div class="reminder-text">
+                        <div>${reminder.title}</div>
+                        <div class="task-due">${reminder.daysText ? reminder.daysText + ' at ' : ''}${reminder.formattedTime}</div>
+                    </div>
+                    <div class="reminder-actions">
+                        <button class="reminder-action-btn" onclick="deleteReminder('${reminder.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                remindersList.appendChild(reminderItem);
+            });
+        }
+
+        function deleteReminder(id) {
+            if (confirm('Are you sure you want to delete this reminder?')) {
+                // Remove from array
+                reminders = reminders.filter(reminder => reminder.id !== id);
+                
+                // Save to localStorage
+                localStorage.setItem('reminders', JSON.stringify(reminders));
+                
+                // Remove from DOM
+                document.getElementById(id).remove();
+                
+                // Show toast notification
+                showToast('Reminder Deleted', 'The reminder has been removed');
+            }
+        }
+
+        // Check if any reminders match current time
+        function checkReminders() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            
+            // Format current time to match reminder time format (HH:MM)
+            const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+            
+            reminders.forEach(reminder => {
+                // Check if time matches
+                if (reminder.time === currentTimeString) {
+                    // Check day constraints
+                    let shouldNotify = false;
+                    
+                    switch (reminder.days) {
+                        case 'daily':
+                            shouldNotify = true;
+                            break;
+                        case 'weekdays':
+                            shouldNotify = currentDay >= 1 && currentDay <= 5;
+                            break;
+                        case 'weekly':
+                            shouldNotify = currentDay === 1; // Notify on Mondays
+                            break;
+                        case 'none':
+                            // For 'none', we should only notify once, so we'd need to track if it was already shown
+                            // For simplicity, we'll just show it every time the time matches
+                            shouldNotify = true;
+                            break;
+                    }
+                    
+                    if (shouldNotify) {
+                        showNotification(reminder.title);
+                    }
+                }
+            });
+        }
+
+        // Show notification
+        function showNotification(title) {
+            // Check if browser supports notifications
+            if (!("Notification" in window)) {
+                showToast('Reminder', title);
+                return;
+            }
+            
+            // Check if permission is already granted
+            if (Notification.permission === "granted") {
+                const notification = new Notification("LearnHub Reminder", {
+                    body: title,
+                    icon: "https://randomuser.me/api/portraits/men/32.jpg"
+                });
+                
+                // Close notification after 5 seconds
+                setTimeout(() => {
+                    notification.close();
+                }, 5000);
+            }
+            // Otherwise, request permission
+            else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        const notification = new Notification("LearnHub Reminder", {
+                            body: title,
+                            icon: "https://randomuser.me/api/portraits/men/32.jpg"
+                        });
+                        
+                        // Close notification after 5 seconds
+                        setTimeout(() => {
+                            notification.close();
+                        }, 5000);
+                    } else {
+                        // Fall back to toast notification
+                        showToast('Reminder', title);
+                    }
+                });
+            } else {
+                // Fall back to toast notification if permission denied
+                showToast('Reminder', title);
+            }
+        }
+
+        // Show toast notification
+        function showToast(title, message) {
+            const toastContainer = document.getElementById('toast-container');
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('reminder-modal')) {
+                hideReminderModal();
+            }
+            if (event.target == document.getElementById('profile-upload-modal')) {
+                hideProfileUploadModal();
+            }
+        }
+
+        // Initialize charts
+        function initCharts() {
+            // Course Completion Chart (Doughnut)
+            const completionCtx = document.getElementById('completionChart').getContext('2d');
+            new Chart(completionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    datasets: [{
+                        data: [65, 25, 10],
+                        backgroundColor: [
+                            '#4caf50',
+                            '#ff9800',
+                            '#e0e0e0'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Weekly Activity Chart (Bar)
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Study Hours',
+                        data: [3, 4, 2, 5, 3, 1, 2],
+                        backgroundColor: '#5e35b1'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Performance Trend Chart (Line)
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: [75, 82, 78, 85, 88, 92],
+                        borderColor: '#5e35b1',
+                        backgroundColor: 'rgba(94, 53, 177, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
